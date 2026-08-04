@@ -11,6 +11,7 @@ import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.springframework.kafka.core.KafkaTemplate;
 
 import user.dto.MessageDto;
@@ -28,6 +29,7 @@ public class UserServiceImplTest {
 
     @BeforeEach
     public void setUp() {
+    	userDto = new UserDto();
     	userDto.setName("test name"); 
     	userDto.setEmail("test email"); 
     	userDto.setAge(15); 
@@ -36,7 +38,7 @@ public class UserServiceImplTest {
     	user = userDto.toEntity(); 
     	
     	mockedUserRepository = mock(UserRepository.class); 
-    	mockedKafkaTemplate = mock(mockedKafkaTemplate.getClass());
+    	mockedKafkaTemplate = mock(KafkaTemplate.class);
     	serviceImpl = new UserServiceImpl(mockedUserRepository, mockedKafkaTemplate);
     }
 
@@ -44,6 +46,15 @@ public class UserServiceImplTest {
     public void createTest(){
     	serviceImpl.create(userDto); 
     	verify(mockedUserRepository, times(1)).save(user);
+    	
+    	ArgumentCaptor<MessageDto> captor = ArgumentCaptor.forClass(MessageDto.class);
+    	
+    	verify(mockedKafkaTemplate, times(1)).send("user-events", captor.capture());
+    	
+    	MessageDto sent = captor.getValue();
+    	
+    	assertEquals("Created", sent.getMessageType());
+    	assertEquals(userDto.getEmail(), sent.getEmail());
     }
 
     @Test
@@ -61,8 +72,8 @@ public class UserServiceImplTest {
     	Optional<User> timedOptional = Optional.of(user); 
     	when(mockedUserRepository.findById(1))
     		.thenReturn(timedOptional); 
-    	Optional<User> resultUser = serviceImpl.readById(1); 
-    	assertEquals(timedOptional, resultUser); 
+    	User resultUser = serviceImpl.readById(1); 
+    	assertEquals(timedOptional.get(), resultUser); 
     	verify(mockedUserRepository, times(1)).findById(1);
     }
 
@@ -74,7 +85,21 @@ public class UserServiceImplTest {
 
     @Test
     public void deleteTest(){
+    	when(mockedUserRepository.findById(1))
+        .thenReturn(Optional.of(user));
+    	
     	serviceImpl.delete(1); 
+    	
     	verify(mockedUserRepository, times(1)).deleteById(1);
+    	verify(mockedUserRepository).findById(1);
+    	
+    	ArgumentCaptor<MessageDto> captor = ArgumentCaptor.forClass(MessageDto.class);
+    	
+    	verify(mockedKafkaTemplate, times(1)).send("user-events", captor.capture());
+    	
+    	MessageDto sent = captor.getValue();
+    	
+    	assertEquals("Deleted", sent.getMessageType());
+    	assertEquals(userDto.getEmail(), sent.getEmail());
     }
 }

@@ -99,9 +99,8 @@ public class UserControllerTest {
 
     @Test
     public void readByIdControllerTest() throws Exception{
-    	Optional<User> innerOptional = Optional.of(user);
     	when(mockedUserServiceImpl.readById(1))
-    		.thenReturn(innerOptional);
+    		.thenReturn(user);
     	UserDto newUserDto = mapper.readValue(mockMvc.perform(get("/users/1")).andExpect(status().isOk()).andReturn().getResponse().getContentAsString(), UserDto.class);
     	verify(mockedUserServiceImpl, times(1)).readById(1);
     	assertEquals(newUserDto, userDto);

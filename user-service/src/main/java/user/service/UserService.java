@@ -8,7 +8,7 @@ import user.entity.User;
 public interface UserService {
     void create(UserDto user);
     Iterable<User> readAll();
-    Optional<User> readById(int id);
+    User readById(int id);
     void update(UserDto user);
     void delete(int id);
 }

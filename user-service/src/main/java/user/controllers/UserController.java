@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import jakarta.validation.Valid;
 import user.dto.UserDto;
 import user.service.UserService;
 
@@ -29,7 +30,7 @@ public class UserController {
 	@GetMapping("/{id}")
 	@ResponseStatus(HttpStatus.OK)
 	public UserDto GetUserById(@PathVariable int id) {
-		return UserDto.toDto(userService.readById(id).get());
+		return UserDto.toDto(userService.readById(id));
 	}
 	
 	@GetMapping
@@ -40,13 +41,13 @@ public class UserController {
 	
 	@PostMapping
 	@ResponseStatus(HttpStatus.CREATED)
-	public void CreateUser(@RequestBody UserDto newUser) {
+	public void CreateUser(@Valid @RequestBody UserDto newUser) {
 		userService.create(newUser);
 	}
 	
 	@PutMapping("/{id}")
 	@ResponseStatus(HttpStatus.OK)
-	public void UpdateUser(@PathVariable int id, @RequestBody UserDto updateUser) {
+	public void UpdateUser(@PathVariable int id, @Valid @RequestBody UserDto updateUser) {
 		updateUser.setId(id);
 		userService.update(updateUser);
 	}
