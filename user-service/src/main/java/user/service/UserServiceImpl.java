@@ -56,7 +56,6 @@ public class UserServiceImpl implements UserService{
 
     @Override
     public void delete(int id){
-    	userRepository.deleteById(id);
     	MessageDto messageDto = new MessageDto();
     	try {
     		messageDto.setEmail(userRepository.findById(id).get().getEmail());
@@ -66,5 +65,6 @@ public class UserServiceImpl implements UserService{
     	catch (Exception e) {
 			logger.error("ошибка отправки сообщения", e);
 		}
+    	userRepository.deleteById(id);
     }
 }

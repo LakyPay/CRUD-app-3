@@ -23,7 +23,7 @@ public class MailMessageDto {
 	public static MailMessageDto toMailMessageDto(MessageDto messageDto) {
 		MailMessageDto mailMessageDto = new MailMessageDto();
 		mailMessageDto.setTo(messageDto.getEmail());
-		if(messageDto.getMessageType() == "Created") {
+		if(messageDto.getMessageType().equals("Created")) {
 			mailMessageDto.setSubject("Ваш аккаунт создан.");
 			mailMessageDto.setText("Здравствуйте! Ваш аккаунт на сайте был успешно создан.");
 		}
