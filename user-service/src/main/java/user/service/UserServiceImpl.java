@@ -27,6 +27,7 @@ public class UserServiceImpl implements UserService{
     @Override
     public void create(UserDto user){
     	userRepository.save(user.toEntityNoId());
+    	
     	MessageDto messageDto = new MessageDto();
     	try {
     		messageDto.setEmail(user.getEmail());
@@ -58,7 +59,9 @@ public class UserServiceImpl implements UserService{
     public void delete(int id){
     	MessageDto messageDto = new MessageDto();
     	try {
-    		messageDto.setEmail(userRepository.findById(id).get().getEmail());
+    		messageDto.setEmail(userRepository.findById(id)
+    				.orElseThrow(() -> new UserNotFoundException("User with id " + id + " not found"))
+    				.getEmail());
         	messageDto.setMessageType("Deleted");
         	kafkaTemplate.send("user-events", messageDto);
 		} 
